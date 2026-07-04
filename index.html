@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AutoRig 2.5D — PSDドロップで動くアバター</title>
+<title>Anime2.5DRig — PSDドロップで動くアバター</title>
 <style>
 :root{--bg:#14151c;--panel:#1d1f2a;--line:#2c2f3e;--txt:#dfe2ee;--sub:#8d93ad;--acc:#7aa2ff;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -85,7 +85,7 @@ header h1{letter-spacing:.05em}
 </style>
 </head>
 <body>
-<header><h1>AutoRig 2.5D</h1><span>PSDをドロップ → 自動リグ → その場で動く 2.5Dアバター</span><button class="btn" id="btnReadme" style="margin-left:auto">README</button></header>
+<header><h1>Anime2.5DRig</h1><span>PSDをドロップ → 自動リグ → その場で動く 2.5Dアバター</span><button class="btn" id="btnReadme" style="margin-left:auto">README</button></header>
 <div id="main">
   <div id="stage" class="checker">
     <canvas id="cv"></canvas>
@@ -455,7 +455,7 @@ async function openReadme(){
     readmeLoaded=true;
   }catch(err){
     body.innerHTML='<p>README.md を取得できませんでした（'+err.message+'）。'+
-      '<a href="https://github.com/852wa/autorig#readme" target="_blank" rel="noopener">GitHubで読む</a></p>';
+      '<a href="https://github.com/852wa/Anime2.5DRig#readme" target="_blank" rel="noopener">GitHubで読む</a></p>';
   }
 }
 document.getElementById('btnReadme').addEventListener('click',openReadme);
