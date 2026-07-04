@@ -85,7 +85,7 @@ header h1{letter-spacing:.05em}
 </style>
 </head>
 <body>
-<header><h1>AutoRig 2.5D</h1><span>PSDをドロップ → 自動リグ → その場で動く（Live2D風 2.5Dアバター）</span><button class="btn" id="btnReadme" style="margin-left:auto">README</button></header>
+<header><h1>AutoRig 2.5D</h1><span>PSDをドロップ → 自動リグ → その場で動く 2.5Dアバター</span><button class="btn" id="btnReadme" style="margin-left:auto">README</button></header>
 <div id="main">
   <div id="stage" class="checker">
     <canvas id="cv"></canvas>
@@ -122,6 +122,7 @@ header h1{letter-spacing:.05em}
       <div class="btns">
         <button class="btn" data-preset="neutral">通常</button>
         <button class="btn" data-preset="smile">笑顔</button>
+        <button class="btn" data-preset="usume">薄目</button>
         <button class="btn" data-preset="surprise">驚き</button>
         <button class="btn" data-preset="jito">ジト目</button>
         <button class="btn" data-preset="winkL">ウインク左</button>
@@ -368,7 +369,8 @@ function setSlider(key,val){ for(const id in sliders) if(sliders[id]===key){
 });
 const presets={
   neutral:{eyeOpenL:1,eyeOpenR:1,brow:0,mouthOpen:0,mouthForm:0,irisScale:1},
-  smile:{eyeOpenL:0.5,eyeOpenR:0.5,brow:0.35,mouthOpen:1,mouthForm:0.8,irisScale:1},
+  smile:{eyeOpenL:0,eyeOpenR:0,brow:0.45,mouthOpen:1,mouthForm:0.9,irisScale:1},
+  usume:{eyeOpenL:0.5,eyeOpenR:0.5,brow:0.35,mouthOpen:1,mouthForm:0.8,irisScale:1},
   surprise:{eyeOpenL:1,eyeOpenR:1,brow:1,mouthOpen:0.75,mouthForm:-0.1,irisScale:0.7},
   jito:{eyeOpenL:0.4,eyeOpenR:0.4,brow:-0.6,mouthOpen:0,mouthForm:-0.4,irisScale:1},
   winkL:{eyeOpenL:0,eyeOpenR:1,brow:0.2,mouthOpen:0.4,mouthForm:0.7,irisScale:1},
@@ -595,7 +597,7 @@ function deform(L, e){
       y += mo*6*FS*smooth((y-A.mouth.cy)/(A.face.y1-A.mouth.cy));
     }
     // --- head transform ---
-    let hw = isHead?1:0;
+    let hw = isHead?1:(L.group==='body'?0.16:0);   // body subtly follows head XYZ
     if(bn==='neck') hw = 0.55*smooth((A.neckBottom-y)/Math.max(1,A.neckBottom-A.neckTop));
     if(hw>0){
       let rx=x-NP.cx, ry=y-NP.cy;
@@ -606,7 +608,8 @@ function deform(L, e){
       y += hw*FS*( -e.angleY*(9+30*(dd-1)) - e.angleY*(dd-1)*(y-FC.y)*0.05 );
     }
     // --- breathing ---
-    y -= e.breath*(L.group==='body'?2.0:1.3)*FS;
+    y -= (L.group==='body'?e.breath*2.0:e.breathHead*1.6)*FS;
+    if(bn==='topwear'&&y<CHEST.cy) y -= e.breath*2.2*FS*smooth((CHEST.cy-y)/(CHEST.ry*2));   // shoulders rise
     if(bn==='topwear') x = NP.cx + (x-NP.cx)*(1+e.breath*0.003);
     // --- bust jiggle ---
     if(bn==='topwear'){
@@ -709,6 +712,7 @@ function tick(now){
   for(const k in cur) cur[k]+=(tgt[k]-cur[k])*Math.min(1,dt*14);
   const e=Object.assign({},cur);
   e.breath=0.5+0.5*Math.sin(t*2*Math.PI/3.4);
+  e.breathHead=0.5+0.5*Math.sin(t*2*Math.PI/3.4-0.6);   // head follows chest with a lag
 
   // strand springs
   const headDX=(e.angleX*14+e.angleZ*0.07*(NP.cy-FC.y))*FS;
