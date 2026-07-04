@@ -153,8 +153,8 @@ header h1{letter-spacing:.05em}
       <div class="row"><label>閉じやすさ</label><input type="range" id="pMouthEase" min="0" max="1" step="0.01" value="0.45"><span class="val"></span></div>
     </div>
     <div class="sec"><h2>前髪</h2>
-      <div class="row"><label>揺れ</label><input type="range" id="pFhAmp" min="0" max="2" step="0.01" value="0.55"><span class="val"></span></div>
-      <div class="row"><label>柔らかさ</label><input type="range" id="pFhSoft" min="0" max="2" step="0.01" value="0.65"><span class="val"></span></div>
+      <div class="row"><label>揺れ</label><input type="range" id="pFhAmp" min="0" max="3" step="0.01" value="2"><span class="val"></span></div>
+      <div class="row"><label>柔らかさ</label><input type="range" id="pFhSoft" min="0" max="2" step="0.01" value="0.4"><span class="val"></span></div>
       <div class="row"><label>ブロック左</label><input type="range" id="pBangL" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>ブロック中央</label><input type="range" id="pBangC" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>ブロック右</label><input type="range" id="pBangR" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
@@ -163,10 +163,10 @@ header h1{letter-spacing:.05em}
       <div class="row"><label>体の傾き</label><input type="range" id="pBody" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>腕の高さ</label><input type="range" id="pArmY" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>腕位置補正</label><input type="range" id="pArmPos" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
-      <div class="row"><label>胸の揺れ</label><input type="range" id="pBust" min="0" max="4" step="0.01" value="0.8"><span class="val"></span></div>
+      <div class="row"><label>胸の揺れ</label><input type="range" id="pBust" min="0" max="4" step="0.01" value="2.5"><span class="val"></span></div>
       <div class="row"><label>胸位置 上下</label><input type="range" id="pBustY" min="-3" max="3" step="0.01" value="1"><span class="val"></span></div>
-      <div class="row"><label>後髪の揺れ</label><input type="range" id="pPhysAmp" min="0" max="2" step="0.01" value="1"><span class="val"></span></div>
-      <div class="row"><label>後髪柔らかさ</label><input type="range" id="pSoft" min="0" max="2" step="0.01" value="0.65"><span class="val"></span></div>
+      <div class="row"><label>後髪の揺れ</label><input type="range" id="pPhysAmp" min="0" max="3" step="0.01" value="2"><span class="val"></span></div>
+      <div class="row"><label>後髪柔らかさ</label><input type="range" id="pSoft" min="0" max="3" step="0.01" value="2"><span class="val"></span></div>
     </div>
     <div class="sec"><h2>ユーティリティ</h2>
       <div class="btns">
@@ -337,10 +337,10 @@ window.addEventListener('drop',async e=>{
 
 // ---------- params ----------
 const P = { angleX:0, angleY:0, angleZ:0, eyeOpenL:1, eyeOpenR:1, eyeX:0, eyeY:0, brow:0,
-            mouthOpen:0, mouthForm:0, mouthCY:0, body:0, physAmp:1, soft:0.65,
+            mouthOpen:0, mouthForm:0, mouthCY:0, body:0, physAmp:2, soft:2,
             browAngL:0, browAngR:0, browAngSym:0, bangL:0, bangC:0, bangR:0,
-            armY:0, armPos:0, bust:0.8, bustY:1, irisScale:1, mouthEase:0.45, eyeEase:0.3,
-            fhAmp:0.55, fhSoft:0.65 };
+            armY:0, armPos:0, bust:2.5, bustY:1, irisScale:1, mouthEase:0.45, eyeEase:0.3,
+            fhAmp:2, fhSoft:0.4 };
 const DEFAULTS = Object.assign({}, P);
 let lastPsd=null, lastPre=null;
 const T = Object.assign({}, P);
@@ -369,7 +369,7 @@ function setSlider(key,val){ for(const id in sliders) if(sliders[id]===key){
 });
 const presets={
   neutral:{eyeOpenL:1,eyeOpenR:1,brow:0,mouthOpen:0,mouthForm:0,irisScale:1},
-  smile:{eyeOpenL:0,eyeOpenR:0,brow:0.45,mouthOpen:1,mouthForm:0.9,irisScale:1},
+  smile:{eyeOpenL:0,eyeOpenR:0,brow:0.45,mouthOpen:0,mouthForm:0.9,irisScale:1},
   usume:{eyeOpenL:0.5,eyeOpenR:0.5,brow:0.35,mouthOpen:1,mouthForm:0.8,irisScale:1},
   surprise:{eyeOpenL:1,eyeOpenR:1,brow:1,mouthOpen:0.75,mouthForm:-0.1,irisScale:0.7},
   jito:{eyeOpenL:0.4,eyeOpenR:0.4,brow:-0.6,mouthOpen:0,mouthForm:-0.4,irisScale:1},
@@ -589,9 +589,7 @@ function deform(L, e){
       y -= e.mouthForm*6*FS*(q-0.35);
     }
     if(L.fade==='mouthClose'){
-      const q=Math.pow(Math.abs(x-A.mouth.cx)/(mHalfW+4),1.5);
-      y -= e.mouthForm*6*FS*(q-0.35);
-      y += e.mouthCY*14*FS;
+      y += e.mouthCY*14*FS;   // 形（笑い）は閉じ口には適用しない
     }
     if(bn==='face' && y>A.mouth.cy){
       y += mo*6*FS*smooth((y-A.mouth.cy)/(A.face.y1-A.mouth.cy));
