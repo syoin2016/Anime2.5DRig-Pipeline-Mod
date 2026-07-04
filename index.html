@@ -40,6 +40,26 @@ canvas{max-width:100%;max-height:100%;display:block}
 #layers{font-size:11px;color:var(--sub);line-height:1.7}
 #layers b{color:var(--txt);font-weight:500}
 .tag{font-size:9px;border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px;color:var(--acc)}
+/* ---- monochrome + deep red theme ---- */
+:root{--bg:#0d0d0f;--panel:#151517;--line:#29292e;--txt:#ececee;--sub:#87878f;--acc:#a01030;--acc2:#d43b55;}
+body{background:radial-gradient(1200px 600px at 70% -10%, rgba(160,16,48,.09), transparent 60%), var(--bg);}
+header{position:relative}
+header::after{content:'';position:absolute;left:0;bottom:-1px;width:140px;height:2px;
+  background:linear-gradient(90deg,var(--acc),transparent);}
+header h1{letter-spacing:.05em}
+.tg,.btn,input[type=range],.sec h2{transition:all .18s ease}
+.tg:hover{border-color:var(--acc);color:var(--acc2)}
+.tg.on{border-color:var(--acc);color:var(--acc2);background:rgba(160,16,48,.14);box-shadow:inset 0 0 8px rgba(160,16,48,.25)}
+.btn{background:#1c1c1f}
+.btn:hover{border-color:var(--acc);color:var(--acc2);transform:translateY(-1px);box-shadow:0 3px 12px rgba(160,16,48,.28)}
+.btn:active{transform:translateY(0)}
+.btn.active{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 12px rgba(212,59,85,.45)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.primary:hover{background:var(--acc2);color:#fff}
+.sec h2{border-left:3px solid var(--acc);padding-left:7px}
+.tag{color:var(--acc2);border-color:#3a3a40}
+#panel{scrollbar-width:thin;scrollbar-color:var(--acc) transparent}
+#drop.dragover{outline-color:var(--acc)}
 </style>
 </head>
 <body>
@@ -120,9 +140,16 @@ canvas{max-width:100%;max-height:100%;display:block}
       <div class="row"><label>腕の高さ</label><input type="range" id="pArmY" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>腕位置補正</label><input type="range" id="pArmPos" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>胸の揺れ</label><input type="range" id="pBust" min="0" max="4" step="0.01" value="0.8"><span class="val"></span></div>
-      <div class="row"><label>胸位置 上下</label><input type="range" id="pBustY" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
+      <div class="row"><label>胸位置 上下</label><input type="range" id="pBustY" min="-2" max="2" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>後髪の揺れ</label><input type="range" id="pPhysAmp" min="0" max="2" step="0.01" value="1"><span class="val"></span></div>
       <div class="row"><label>後髪柔らかさ</label><input type="range" id="pSoft" min="0" max="2" step="0.01" value="0.65"><span class="val"></span></div>
+    </div>
+    <div class="sec"><h2>ユーティリティ</h2>
+      <div class="btns">
+        <button class="btn" id="btnReset">数値リセット</button>
+        <button class="btn" id="btnSavePsd">軽量PSDを保存</button>
+      </div>
+      <div id="utilStatus" style="font-size:11px;color:var(--sub);margin-top:6px"></div>
     </div>
     <div class="sec"><h2>背景</h2>
       <div class="btns">
@@ -248,15 +275,19 @@ async function loadPsdBuffer(buf){
   try{
     dropStatus.textContent='解析中…';
     const psd=window.agPsd.readPsd(new Uint8Array(buf),{useImageData:true,skipThumbnail:true});
+    const pre=window.Rigger.cleanPsdLayers(psd);   // 下処理: 全レイヤーのノイズ除去+トリム
+    lastPsd=psd; lastPre=pre;
     const rig=window.Rigger.buildRig(psd);
     applyRig(rig);
+    if(pre.noisy>0) document.getElementById('rigInfo').innerHTML +=
+      '<br>下処理: 低アルファノイズを '+pre.noisy+'/'+pre.layers+' レイヤーから除去（「軽量PSDを保存」で書き出せます）';
     dropStatus.textContent='';
   }catch(err){
     dropStatus.textContent='エラー: '+err.message;
     dropEl.classList.remove('hidden');
   }
 }
-window.__loadPsdData=function(psd){ applyRig(window.Rigger.buildRig(psd)); }; // test hook
+window.__loadPsdData=function(psd){ lastPre=window.Rigger.cleanPsdLayers(psd); lastPsd=psd; applyRig(window.Rigger.buildRig(psd)); }; // test hook
 document.getElementById('btnFile').addEventListener('click',()=>document.getElementById('fileInput').click());
 document.getElementById('fileInput').addEventListener('change',async ev=>{
   const f=ev.target.files[0]; if(f) loadPsdBuffer(await f.arrayBuffer());
@@ -282,6 +313,8 @@ const P = { angleX:0, angleY:0, angleZ:0, eyeOpenL:1, eyeOpenR:1, eyeX:0, eyeY:0
             browAngL:0, browAngR:0, browAngSym:0, bangL:0, bangC:0, bangR:0,
             armY:0, armPos:0, bust:0.8, bustY:0, irisScale:1, mouthEase:0.45, eyeEase:0.3,
             fhAmp:0.55, fhSoft:0.65 };
+const DEFAULTS = Object.assign({}, P);
+let lastPsd=null, lastPre=null;
 const T = Object.assign({}, P);
 const cur = Object.assign({}, P);
 const auto = { idle:true, blink:true, rand:true, talk:true, mouse:false, mic:false, phys:true, cam:false };
@@ -313,8 +346,36 @@ const presets={
   jito:{eyeOpenL:0.4,eyeOpenR:0.4,brow:-0.6,mouthOpen:0,mouthForm:-0.4,irisScale:1},
   winkL:{eyeOpenL:0,eyeOpenR:1,brow:0.2,mouthOpen:0.4,mouthForm:0.7,irisScale:1},
   winkR:{eyeOpenL:1,eyeOpenR:0,brow:0.2,mouthOpen:0.4,mouthForm:0.7,irisScale:1} };
+let activePreset=null;
+function clearPresetHighlight(){ document.querySelectorAll('[data-preset]').forEach(x=>x.classList.remove('active')); }
 document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{
-  const p=presets[b.dataset.preset]; for(const k in p) setSlider(k,p[k]); }));
+  const name=b.dataset.preset;
+  clearPresetHighlight();
+  if(activePreset===name){ activePreset=null;
+    const p=presets.neutral; for(const k in p) setSlider(k,p[k]);
+  } else {
+    activePreset=name; b.classList.add('active');
+    const p=presets[name]; for(const k in p) setSlider(k,p[k]);
+  }
+}));
+document.getElementById('btnReset').addEventListener('click',()=>{
+  activePreset=null; clearPresetHighlight();
+  for(const id in sliders) setSlider(sliders[id], DEFAULTS[sliders[id]]);
+  document.getElementById('utilStatus').textContent='全パラメータを初期値に戻しました';
+});
+document.getElementById('btnSavePsd').addEventListener('click',()=>{
+  const st=document.getElementById('utilStatus');
+  if(!lastPsd){ st.textContent='先にPSDを読み込んでください'; return; }
+  try{
+    st.textContent='書き出し中…';
+    const out=window.agPsd.writePsd(lastPsd,{generateThumbnail:false});
+    const blob=new Blob([out],{type:'application/octet-stream'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='model_clean.psd'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    st.textContent='軽量PSDを保存しました（'+(blob.size/1e6).toFixed(1)+'MB / ノイズ除去+トリム済み）';
+  }catch(err){ st.textContent='書き出しエラー: '+err.message; }
+});
 document.querySelectorAll('[data-bg]').forEach(b=>b.addEventListener('click',()=>{
   const s=document.getElementById('stage'); s.className='';
   if(b.dataset.bg==='checker')s.classList.add('checker');
