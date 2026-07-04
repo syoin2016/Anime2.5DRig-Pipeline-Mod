@@ -481,6 +481,7 @@ function initMic(){ if(analyser) return;
 
 // ---------- webcam face tracking (MediaPipe FaceMesh, lazy CDN) ----------
 const cam={live:false,ax:0,ay:0,az:0,eL:1,eR:1,mo:0,ex:0,ey:0};
+let camPhysScale=1;   // カメラ追従中は揺れ・柔らかさを0.5倍
 let camVideo=null, camFM=null, camBusy=false;
 function loadScript(u){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
 async function initCam(){
@@ -709,6 +710,8 @@ function tick(now){
   }
   for(const k in cur) cur[k]+=(tgt[k]-cur[k])*Math.min(1,dt*14);
   const e=Object.assign({},cur);
+  camPhysScale+=((camLive?0.5:1)-camPhysScale)*Math.min(1,dt*4);
+  e.physAmp*=camPhysScale; e.soft*=camPhysScale; e.fhAmp*=camPhysScale; e.fhSoft*=camPhysScale;
   e.breath=0.5+0.5*Math.sin(t*2*Math.PI/3.4);
   e.breathHead=0.5+0.5*Math.sin(t*2*Math.PI/3.4-0.6);   // head follows chest with a lag
 
