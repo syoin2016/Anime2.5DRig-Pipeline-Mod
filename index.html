@@ -163,7 +163,7 @@ header h1{letter-spacing:.05em}
       <div class="row"><label>腕の高さ</label><input type="range" id="pArmY" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>腕位置補正</label><input type="range" id="pArmPos" min="-1" max="1" step="0.01" value="0"><span class="val"></span></div>
       <div class="row"><label>胸の揺れ</label><input type="range" id="pBust" min="0" max="4" step="0.01" value="0.8"><span class="val"></span></div>
-      <div class="row"><label>胸位置 上下</label><input type="range" id="pBustY" min="-2" max="2" step="0.01" value="0"><span class="val"></span></div>
+      <div class="row"><label>胸位置 上下</label><input type="range" id="pBustY" min="-3" max="3" step="0.01" value="1"><span class="val"></span></div>
       <div class="row"><label>後髪の揺れ</label><input type="range" id="pPhysAmp" min="0" max="2" step="0.01" value="1"><span class="val"></span></div>
       <div class="row"><label>後髪柔らかさ</label><input type="range" id="pSoft" min="0" max="2" step="0.01" value="0.65"><span class="val"></span></div>
     </div>
@@ -338,7 +338,7 @@ window.addEventListener('drop',async e=>{
 const P = { angleX:0, angleY:0, angleZ:0, eyeOpenL:1, eyeOpenR:1, eyeX:0, eyeY:0, brow:0,
             mouthOpen:0, mouthForm:0, mouthCY:0, body:0, physAmp:1, soft:0.65,
             browAngL:0, browAngR:0, browAngSym:0, bangL:0, bangC:0, bangR:0,
-            armY:0, armPos:0, bust:0.8, bustY:0, irisScale:1, mouthEase:0.45, eyeEase:0.3,
+            armY:0, armPos:0, bust:0.8, bustY:1, irisScale:1, mouthEase:0.45, eyeEase:0.3,
             fhAmp:0.55, fhSoft:0.65 };
 const DEFAULTS = Object.assign({}, P);
 let lastPsd=null, lastPre=null;
