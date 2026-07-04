@@ -484,9 +484,22 @@ const cam={live:false,ax:0,ay:0,az:0,eL:1,eR:1,mo:0,ex:0,ey:0};
 let camPhysScale=1;   // カメラ追従中は揺れ・柔らかさを0.5倍
 let camVideo=null, camFM=null, camBusy=false;
 function loadScript(u){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+let camLoopOn=false;
+async function camLoop(){
+  if(!auto.cam){ cam.live=false; camLoopOn=false; return; }   // OFFでループ終了
+  if(!camBusy&&camVideo&&camVideo.readyState>=2){
+    camBusy=true; try{ await camFM.send({image:camVideo}); }catch(err){} camBusy=false;
+  }
+  setTimeout(camLoop,33);
+}
 async function initCam(){
   const chip=document.getElementById('tgCam');
-  if(camFM){ return; }
+  if(camFM){   // 再ON: ループを再起動
+    try{ if(camVideo&&camVideo.paused) await camVideo.play(); }catch(err){}
+    chip.textContent='カメラ追従中';
+    if(!camLoopOn){ camLoopOn=true; camLoop(); }
+    return;
+  }
   try{
     chip.textContent='カメラ準備中…';
     if(!window.FaceMesh) await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
@@ -497,11 +510,7 @@ async function initCam(){
     camFM.setOptions({maxNumFaces:1,refineLandmarks:true,minDetectionConfidence:0.5,minTrackingConfidence:0.5});
     camFM.onResults(onFace);
     chip.textContent='カメラ追従中';
-    (async function loop(){
-      if(!auto.cam){ cam.live=false; return; }
-      if(!camBusy&&camVideo.readyState>=2){ camBusy=true; try{ await camFM.send({image:camVideo}); }catch(err){} camBusy=false; }
-      setTimeout(loop,33);
-    })();
+    if(!camLoopOn){ camLoopOn=true; camLoop(); }
   }catch(err){
     chip.textContent='カメラ不可'; auto.cam=false; chip.classList.remove('on');
   }
