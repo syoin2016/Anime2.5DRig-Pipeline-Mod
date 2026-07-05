@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+pipeline/jobs/
+pipeline/latest/
+pipeline/logs/

@@ -343,6 +343,20 @@ const P = { angleX:0, angleY:0, angleZ:0, eyeOpenL:1, eyeOpenR:1, eyeX:0, eyeY:0
             fhAmp:2, fhSoft:0.4 };
 const DEFAULTS = Object.assign({}, P);
 let lastPsd=null, lastPre=null;
+const autoPsdUrl = new URLSearchParams(location.search).get('psd');
+if(autoPsdUrl){
+  (async()=>{
+    try{
+      dropStatus.textContent='PSDを自動読み込み中…';
+      const r=await fetch(autoPsdUrl,{cache:'no-store'});
+      if(!r.ok) throw new Error(autoPsdUrl+' を取得できません（HTTP '+r.status+'）');
+      await loadPsdBuffer(await r.arrayBuffer());
+    }catch(err){
+      dropStatus.textContent='自動読み込みエラー: '+err.message;
+      dropEl.classList.remove('hidden');
+    }
+  })();
+}
 const T = Object.assign({}, P);
 const cur = Object.assign({}, P);
 const auto = { idle:true, blink:true, rand:true, talk:true, mouse:false, mic:false, phys:true, cam:false };

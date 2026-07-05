@@ -1,0 +1,39 @@
+{
+  "host": "127.0.0.1",
+  "port": 8767,
+  "comfy_url": "http://127.0.0.1:8189",
+  "comfy_root": "D:\\StabilityMatrix\\Data\\Packages\\ComfyUI",
+  "comfy_python": "D:\\StabilityMatrix\\Data\\Packages\\ComfyUI\\venv\\Scripts\\python.exe",
+  "see_through_root": "D:\\see-through",
+  "see_through_python": "D:\\see-through\\.venv\\Scripts\\python.exe",
+  "eagle_library": "D:\\picture\\normal.library",
+  "default_model": "hakushiMix_v141.safetensors",
+  "model_options": [
+    "anima-base-v1.0.safetensors",
+    "hakushiMix_v141.safetensors",
+    "vxpILBaseNSFW_v10.safetensors"
+  ],
+  "default_width": 768,
+  "default_height": 768,
+  "default_steps": 10,
+  "default_cfg": 7.0,
+  "default_sampler": "euler_ancestral",
+  "default_scheduler": "normal",
+  "default_resolution": 1024,
+  "default_resolution_depth": 720,
+  "anima_base": {
+    "unet": "anima-base-v1.0.safetensors",
+    "clip": "qwen_3_06b_base.safetensors",
+    "vae": "qwen_image_vae.safetensors",
+    "width": 1024,
+    "height": 1024,
+    "steps": 30,
+    "cfg": 4.0,
+    "sampler_name": "er_sde",
+    "scheduler": "simple",
+    "shift": 3.0,
+    "prompt_prefix": "You are an assistant designed to generate anime images based on textual prompts. <Prompt Start>\n"
+  },
+  "job_timeout_minutes": 90,
+  "stop_owned_comfy_before_see_through": true
+}
